@@ -22,10 +22,11 @@ struct
 //  ==== Puts ==== Token
 struct{
     char token[10];
+    int id_token;
 }constuct_puts[]={
-    {"puts"},
-    {"<<"},
-    {"\""},
-    {"\""},
-    {";"}
+    {"puts", 1},
+    {"<<", 2},
+    {"\"", 3},
+    {"\"", 4},
+    {";", 5}
 };

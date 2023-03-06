@@ -7,8 +7,10 @@
 #include "__token.h"
 #include "__parser.h"
 
+
 void WriteSymbolToken(char ResultDefinitionToken[][100], char Symbol, int KToken, int SymbolInTokens[]);
 void WriteStringToken(char ResultDefinitionToken[][100], char String[], int KToken, int SymbolInString, int SymbolInTokens[]);
+void InitializationPuts(char ResultDefinitionToken[][100], int KToken, int SymbolInTokens[], char StringLine[]);
 
 // Процедура для получения всех токенов в строке
 // TokenInLine - исходная строка
@@ -77,6 +79,7 @@ void DefinitionToken(char ResultDefinitionToken[][100], int KToken, int SymbolIn
     char TestToken[100];
     int IndexInTestToken = 0;
 
+    int flag = 0;
     for(int index_token = 0; index_token < KToken; index_token++){
         for(int symbol_index = 0; symbol_index < SymbolInTokens[index_token]; symbol_index++){
 
@@ -87,15 +90,26 @@ void DefinitionToken(char ResultDefinitionToken[][100], int KToken, int SymbolIn
             for(int main_index = 0; main_index < (sizeof(MainToken)/sizeof(MainToken[0])); main_index++){
                 if(strcmp(TestToken, MainToken[main_index].token) == 0){
 
-                    // Проверяем по id_token какой главныйтокен был найден и инициализируем его
+                    // Проверяем по id_token какой главный токен был найден и инициализируем его
                     switch (MainToken[main_index].id_token){
                         case 1:
                             InitializationPuts(ResultDefinitionToken, KToken, SymbolInTokens, StringLine);
                             break;
                     }
+                    flag = 1;
                 }
             }
         }
+
+        if(flag == 0){
+            puts("=== Error main ===");
+            puts("Main token not defined!");
+            break;
+        }else if(flag == 1){
+           flag = 0;
+           break;
+        }
+
     }
 }
 
@@ -106,26 +120,57 @@ void InitializationPuts(char ResultDefinitionToken[][100], int KToken, int Symbo
     // Индекс для перебора токенов комманды === puts ===
     int IndexPuts = 0;
     // Для ошибок
-    char ErrPuts[10];
+    int def_id[10];
+    int index_def = 0;
+
+    int err[10];
+    int index_err = 0;
+    int flag = 0;
 
     for(int index_token = 0; index_token < KToken; index_token++){
         for(int symbol_index = 0; symbol_index < SymbolInTokens[index_token]; symbol_index++){
             TestToken[symbol_index] = ResultDefinitionToken[index_token][symbol_index];
         }
 
+        for(int index = 0; index < (sizeof(constuct_puts)/sizeof(constuct_puts[0])); index++){
+            if(strcmp(TestToken, constuct_puts[index].token) == 0){
+                def_id[index_def] = constuct_puts[index].id_token;
+                index_def+=1;
+            }
+        }
         if(strcmp(TestToken, constuct_puts[IndexPuts].token) == 0){
             memset(TestToken,0,sizeof(IndexPuts));
             IndexPuts+=1;
-        }else{
-            ErrPuts[index_token] = '1';
         }
     }
 
 
-    if(KToken < (sizeof(constuct_puts)/sizeof(constuct_puts[0]))){
-        printf("Error!\n");
-    }else{
-        printf("KToken:%d; core:%d\n",KToken , (sizeof(constuct_puts)/sizeof(constuct_puts[0])));
+    if(KToken == (sizeof(constuct_puts)/sizeof(constuct_puts[0]))){
         __puts(StringLine);
+    }else{
+        puts("=== Syntax error ===");
+        // Поиск ненайденных токено
+        for(int index = 0; index < (sizeof(constuct_puts)/sizeof(constuct_puts[0])); index++){
+            for(int i = 0; i < index_def; i++){
+                if(constuct_puts[index].id_token == def_id[i]){
+                    flag = 1;
+                }
+            }
+            if(flag == 0){
+                err[index_err] = constuct_puts[index].id_token;
+                index_err += 1;
+            }
+            flag = 0;
+        }
+
+        // Вывод ненайденных токенов
+        for(int index = 0; index < (sizeof(constuct_puts)/sizeof(constuct_puts[0])); index++){
+            for(int index_e = 0; index_e < index_err; index_e++){
+                if(constuct_puts[index].id_token == err[index_e]){
+                    printf("Token  %s  not defined !\n", constuct_puts[index].token);
+                }
+
+            }
+        }
     }
 }
